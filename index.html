@@ -1,53 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Geolocation Heading</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            margin: 0;
-            padding: 20px;
-            background-color: #f0f8ff;
-        }
-        #heading-display {
-            margin-top: 20px;
-            font-size: 1.5em;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Compass App</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
-<body>
-    <h1>Geolocation Heading</h1>
-    <button onclick="startTracking()">Start Tracking</button>
-    <p id="heading-display">Heading: Not available</p>
-
-    <script>
-        let watchID = null;
-
-        function startTracking() {
-            if (navigator.geolocation) {
-                watchID = navigator.geolocation.watchPosition(
-                    (position) => {
-                        const { heading } = position.coords;
-                        const headingDisplay = document.getElementById("heading-display");
-
-                        if (heading !== null) {
-                            headingDisplay.textContent = `Heading: ${Math.round(heading)}°`;
-                        } else {
-                            headingDisplay.textContent = "Heading: Not available (move your device)";
-                        }
-                    },
-                    (error) => {
-                        alert("Error getting location: " + error.message);
-                    },
-                    { enableHighAccuracy: true }
-                );
-            } else {
-                alert("Geolocation is not supported by your browser.");
-            }
-        }
-    </script>
+<body onload="startCompass()">
+  <div class="container">
+    <h1>Compass App</h1>
+    <div class="compass">
+      <p><strong>Heading:</strong> <span id="heading">--</span></p>
+      <p><strong>Direction:</strong> <span id="direction">--</span></p>
+    </div>
+    <p class="note">Rotate your device to see the heading and direction.</p>
+  </div>
+  <script src="script.js"></script>
 </body>
 </html>
