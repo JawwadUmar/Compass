@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compass App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f8ff;
+        }
+        #compass {
+            margin: 20px auto;
+            width: 200px;
+            height: 200px;
+            border: 5px solid #000;
+            border-radius: 50%;
+            position: relative;
+            background: linear-gradient(to bottom, #fff, #e0e0e0);
+        }
+        #compass::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 10px;
+            height: 10px;
+            background-color: red;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 2;
+        }
+        #arrow {
+            position: absolute;
+            top: 10%;
+            left: 50%;
+            width: 10px;
+            height: 90px;
+            background: red;
+            transform-origin: bottom center;
+            transform: translateX(-50%);
+            z-index: 1;
+        }
+        #heading {
+            margin-top: 20px;
+            font-size: 1.5em;
+        }
+    </style>
+</head>
+<body>
+    <h1>Compass App</h1>
+    <div id="compass">
+        <div id="arrow"></div>
+    </div>
+    <p id="heading">Heading: 0°</p>
+
+    <script>
+        const arrow = document.getElementById("arrow");
+        const headingDisplay = document.getElementById("heading");
+
+        if (window.DeviceOrientationEvent) {
+            window.addEventListener("deviceorientation", (event) => {
+                let heading = event.alpha; // Alpha represents the compass direction
+                if (typeof heading === "number") {
+                    arrow.style.transform = `translateX(-50%) rotate(${heading}deg)`;
+                    headingDisplay.textContent = `Heading: ${Math.round(heading)}°`;
+                }
+            });
+        } else {
+            headingDisplay.textContent = "Your device does not support orientation events.";
+        }
+    </script>
+</body>
+</html>
