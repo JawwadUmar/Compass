@@ -58,20 +58,79 @@
     <p id="heading">Heading: 0°</p>
 
     <script>
-        const arrow = document.getElementById("arrow");
-        const headingDisplay = document.getElementById("heading");
-
-        if (window.DeviceOrientationEvent) {
-            window.addEventListener("deviceorientation", (event) => {
-                let heading = event.alpha; // Alpha represents the compass direction
-                if (typeof heading === "number") {
-                    arrow.style.transform = `translateX(-50%) rotate(${heading}deg)`;
-                    headingDisplay.textContent = `Heading: ${Math.round(heading)}°`;
-                }
-            });
-        } else {
-            headingDisplay.textContent = "Your device does not support orientation events.";
+        let targetLat, targetLon;
+    
+        function calculateBearing(lat1, lon1, lat2, lon2) {
+            const toRadians = (deg) => (deg * Math.PI) / 180;
+            const toDegrees = (rad) => (rad * 180) / Math.PI;
+    
+            const dLon = toRadians(lon2 - lon1);
+            const y = Math.sin(dLon) * Math.cos(toRadians(lat2));
+            const x =
+                Math.cos(toRadians(lat1)) * Math.sin(toRadians(lat2)) -
+                Math.sin(toRadians(lat1)) * Math.cos(toRadians(lat2)) * Math.cos(dLon);
+    
+            let bearing = toDegrees(Math.atan2(y, x));
+            return (bearing + 360) % 360; // Normalize to 0-360
+        }
+    
+        function startCompass() {
+            targetLat = parseFloat(document.getElementById("latitude").value);
+            targetLon = parseFloat(document.getElementById("longitude").value);
+    
+            if (isNaN(targetLat) || isNaN(targetLon)) {
+                alert("Please enter valid latitude and longitude!");
+                return;
+            }
+    
+            if (window.DeviceOrientationEvent) {
+                // Notify user to calibrate sensors
+                alert("Please rotate your device in a figure-8 motion to calibrate the compass.");
+    
+                window.addEventListener("deviceorientation", (event) => {
+                    let heading;
+    
+                    // Use webkitCompassHeading if available (True North)
+                    if (event.webkitCompassHeading !== undefined) {
+                        heading = event.webkitCompassHeading; // True North
+                    } else if (event.alpha !== null) {
+                        heading = event.alpha; // Fallback to alpha
+                    } else {
+                        document.getElementById("status").textContent = "Unable to get heading.";
+                        return;
+                    }
+    
+                    document.getElementById("heading").textContent = heading.toFixed(2) + "°";
+    
+                    // Use the user's current location
+                    navigator.geolocation.getCurrentPosition(
+                        (position) => {
+                            const currentLat = position.coords.latitude;
+                            const currentLon = position.coords.longitude;
+    
+                            const bearing = calculateBearing(currentLat, currentLon, targetLat, targetLon);
+                            document.getElementById("bearing").textContent = bearing.toFixed(2) + "°";
+    
+                            const difference = Math.abs(heading - bearing);
+                            if (difference < 15 || difference > 345) {
+                                document.getElementById("status").textContent = "You're facing the target!";
+                                document.getElementById("status").style.color = "green";
+                            } else {
+                                document.getElementById("status").textContent = "Adjust your direction.";
+                                document.getElementById("status").style.color = "red";
+                            }
+                        },
+                        (error) => {
+                            alert("Error getting location: " + error.message);
+                        },
+                        { enableHighAccuracy: true }
+                    );
+                });
+            } else {
+                alert("Device Orientation is not supported on this device.");
+            }
         }
     </script>
+    
 </body>
 </html>
